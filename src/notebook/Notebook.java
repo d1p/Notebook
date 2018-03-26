@@ -5,6 +5,11 @@
  */
 package notebook;
 
+import java.sql.*;
+import javax.swing.DefaultListModel;
+
+;
+
 /**
  *
  * @author nihan
@@ -16,6 +21,33 @@ public class Notebook extends javax.swing.JFrame {
      */
     public Notebook() {
         initComponents();
+        Connection conn = null;
+        try {
+            String url = "jdbc:sqlite:notebook.db";
+            conn = DriverManager.getConnection(url);
+            Statement stmt = null;
+            stmt = conn.createStatement();
+            String sql = "SELECT name FROM note WHERE 1;";
+            ResultSet rs = stmt.executeQuery(sql);
+            DefaultListModel model = new DefaultListModel();
+            int i = 0;
+            while (rs.next()) {
+                String name = rs.getString("name");
+                model.add(i, name);
+                i++;
+            }
+            noteList.setModel(model);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException ex) {
+                System.out.println(ex.getMessage());
+            }
+        }
     }
 
     /**
@@ -27,53 +59,71 @@ public class Notebook extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jDialog1 = new javax.swing.JDialog();
-        jTextField1 = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
+        newFileDialogue = new javax.swing.JDialog();
+        fileNameInput = new javax.swing.JTextField();
+        createButton = new javax.swing.JButton();
+        fileNameLabel = new javax.swing.JLabel();
+        jFrame1 = new javax.swing.JFrame();
         jSplitPane2 = new javax.swing.JSplitPane();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
+        noteList = new javax.swing.JList<>();
+        jPanel1 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        noteEditorPane = new javax.swing.JEditorPane();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
 
-        jDialog1.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        jDialog1.setTitle("Add a new note");
-        jDialog1.setAlwaysOnTop(true);
-        jDialog1.setModal(true);
+        newFileDialogue.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        newFileDialogue.setTitle("Add a new note");
+        newFileDialogue.setAlwaysOnTop(true);
+        newFileDialogue.setMinimumSize(new java.awt.Dimension(400, 200));
+        newFileDialogue.setModal(true);
 
-        jTextField1.setText("jTextField1");
-
-        jButton1.setText("Create");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        createButton.setText("Create");
+        createButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                createButtonActionPerformed(evt);
             }
         });
 
-        javax.swing.GroupLayout jDialog1Layout = new javax.swing.GroupLayout(jDialog1.getContentPane());
-        jDialog1.getContentPane().setLayout(jDialog1Layout);
-        jDialog1Layout.setHorizontalGroup(
-            jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jDialog1Layout.createSequentialGroup()
-                .addGap(78, 78, 78)
-                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 254, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(68, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jDialog1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jButton1)
-                .addGap(166, 166, 166))
+        fileNameLabel.setText("Enter the file name");
+
+        javax.swing.GroupLayout newFileDialogueLayout = new javax.swing.GroupLayout(newFileDialogue.getContentPane());
+        newFileDialogue.getContentPane().setLayout(newFileDialogueLayout);
+        newFileDialogueLayout.setHorizontalGroup(
+            newFileDialogueLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(newFileDialogueLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(newFileDialogueLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(fileNameInput, javax.swing.GroupLayout.PREFERRED_SIZE, 254, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(createButton)
+                    .addComponent(fileNameLabel))
+                .addContainerGap(102, Short.MAX_VALUE))
         );
-        jDialog1Layout.setVerticalGroup(
-            jDialog1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jDialog1Layout.createSequentialGroup()
-                .addGap(70, 70, 70)
-                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jButton1)
-                .addContainerGap(156, Short.MAX_VALUE))
+        newFileDialogueLayout.setVerticalGroup(
+            newFileDialogueLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(newFileDialogueLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(fileNameLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(fileNameInput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(createButton)
+                .addContainerGap(84, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jFrame1Layout = new javax.swing.GroupLayout(jFrame1.getContentPane());
+        jFrame1.getContentPane().setLayout(jFrame1Layout);
+        jFrame1Layout.setHorizontalGroup(
+            jFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        jFrame1Layout.setVerticalGroup(
+            jFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -81,14 +131,30 @@ public class Notebook extends javax.swing.JFrame {
         jSplitPane2.setDividerLocation(180);
         jSplitPane2.setDividerSize(2);
 
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
+        noteList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        noteList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                noteListMouseClicked(evt);
+            }
         });
-        jScrollPane1.setViewportView(jList1);
+        jScrollPane1.setViewportView(noteList);
 
         jSplitPane2.setLeftComponent(jScrollPane1);
+
+        jScrollPane2.setViewportView(noteEditorPane);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 997, Short.MAX_VALUE)
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 460, Short.MAX_VALUE)
+        );
+
+        jSplitPane2.setRightComponent(jPanel1);
 
         jMenu1.setText("File");
 
@@ -122,7 +188,7 @@ public class Notebook extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSplitPane2)
+            .addComponent(jSplitPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 957, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -139,12 +205,41 @@ public class Notebook extends javax.swing.JFrame {
     }//GEN-LAST:event_jCheckBoxMenuItem1ActionPerformed
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        jDialog1.setVisible(true);
+        newFileDialogue.setVisible(true);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void createButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createButtonActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_createButtonActionPerformed
+
+    private void noteListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_noteListMouseClicked
+        String noteName = noteList.getSelectedValue();
+                Connection conn = null;
+        try {
+            String url = "jdbc:sqlite:notebook.db";
+            conn = DriverManager.getConnection(url);
+            Statement stmt = null;
+            stmt = conn.createStatement();
+            String sql = "SELECT content FROM note WHERE name = \"" + noteName + "\";";
+            ResultSet rs = stmt.executeQuery(sql);
+            DefaultListModel model = new DefaultListModel();
+            int i = 0;
+            while (rs.next()) {
+                String content = rs.getString("content");
+                noteEditorPane.setText(content);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException ex) {
+                System.out.println(ex.getMessage());
+            }
+        }
+    }//GEN-LAST:event_noteListMouseClicked
 
     /**
      * @param args the command line arguments
@@ -182,16 +277,21 @@ public class Notebook extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton createButton;
+    private javax.swing.JTextField fileNameInput;
+    private javax.swing.JLabel fileNameLabel;
     private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
-    private javax.swing.JDialog jDialog1;
-    private javax.swing.JList<String> jList1;
+    private javax.swing.JFrame jFrame1;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSplitPane jSplitPane2;
-    private javax.swing.JTextField jTextField1;
+    private javax.swing.JDialog newFileDialogue;
+    private javax.swing.JEditorPane noteEditorPane;
+    private javax.swing.JList<String> noteList;
     // End of variables declaration//GEN-END:variables
 }
