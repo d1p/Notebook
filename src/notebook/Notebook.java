@@ -6,9 +6,16 @@
 package notebook;
 
 import java.sql.*;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
+import javafx.scene.web.WebView;
 import javax.swing.DefaultListModel;
-
-;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import org.commonmark.node.*;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 
 /**
  *
@@ -19,35 +26,12 @@ public class Notebook extends javax.swing.JFrame {
     /**
      * Creates new form Notebook
      */
+    String currentNote;
+    String shadowNote;
+    
     public Notebook() {
         initComponents();
-        Connection conn = null;
-        try {
-            String url = "jdbc:sqlite:notebook.db";
-            conn = DriverManager.getConnection(url);
-            Statement stmt = null;
-            stmt = conn.createStatement();
-            String sql = "SELECT name FROM note WHERE 1;";
-            ResultSet rs = stmt.executeQuery(sql);
-            DefaultListModel model = new DefaultListModel();
-            int i = 0;
-            while (rs.next()) {
-                String name = rs.getString("name");
-                model.add(i, name);
-                i++;
-            }
-            noteList.setModel(model);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                System.out.println(ex.getMessage());
-            }
-        }
+        updateList();
     }
 
     /**
@@ -64,6 +48,7 @@ public class Notebook extends javax.swing.JFrame {
         createButton = new javax.swing.JButton();
         fileNameLabel = new javax.swing.JLabel();
         jFrame1 = new javax.swing.JFrame();
+        WJframe = new javax.swing.JFrame();
         jSplitPane2 = new javax.swing.JSplitPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         noteList = new javax.swing.JList<>();
@@ -73,6 +58,8 @@ public class Notebook extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
+        jMenuItem3 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
 
@@ -126,6 +113,17 @@ public class Notebook extends javax.swing.JFrame {
             .addGap(0, 300, Short.MAX_VALUE)
         );
 
+        javax.swing.GroupLayout WJframeLayout = new javax.swing.GroupLayout(WJframe.getContentPane());
+        WJframe.getContentPane().setLayout(WJframeLayout);
+        WJframeLayout.setHorizontalGroup(
+            WJframeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 400, Short.MAX_VALUE)
+        );
+        WJframeLayout.setVerticalGroup(
+            WJframeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 300, Short.MAX_VALUE)
+        );
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jSplitPane2.setDividerLocation(180);
@@ -147,7 +145,7 @@ public class Notebook extends javax.swing.JFrame {
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 997, Short.MAX_VALUE)
+            .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 774, Short.MAX_VALUE)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -167,12 +165,30 @@ public class Notebook extends javax.swing.JFrame {
         });
         jMenu1.add(jMenuItem1);
 
+        jMenuItem2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItem2.setText("Save");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem2);
+
+        jMenuItem3.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_DELETE, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItem3.setText("Delete");
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem3);
+
         jMenuBar1.add(jMenu1);
 
         jMenu2.setText("View");
 
-        jCheckBoxMenuItem1.setSelected(true);
-        jCheckBoxMenuItem1.setText("jCheckBoxMenuItem1");
+        jCheckBoxMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ENTER, java.awt.event.InputEvent.CTRL_MASK));
+        jCheckBoxMenuItem1.setText("Change mode");
         jCheckBoxMenuItem1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jCheckBoxMenuItem1ActionPerformed(evt);
@@ -201,33 +217,43 @@ public class Notebook extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jCheckBoxMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxMenuItem1ActionPerformed
-        // TODO add your handling code here:
+        if (jCheckBoxMenuItem1.isSelected() == true) {
+            noteEditorPane.setEditable(false);
+            this.shadowNote = noteEditorPane.getText();
+            Parser parser = Parser.builder().build();
+            Node document = parser.parse(noteEditorPane.getText());
+            HtmlRenderer renderer = HtmlRenderer.builder().build();
+            String s = renderer.render(document);
+            noteEditorPane.setContentType("text/html");
+            noteEditorPane.setText(s);
+        } else {
+            noteEditorPane.setEditable(true);
+            noteEditorPane.setContentType("text/plain");
+            noteEditorPane.setText(this.shadowNote);
+        }
     }//GEN-LAST:event_jCheckBoxMenuItem1ActionPerformed
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
         newFileDialogue.setVisible(true);
     }//GEN-LAST:event_jMenuItem1ActionPerformed
-
-    private void createButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createButtonActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_createButtonActionPerformed
-
-    private void noteListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_noteListMouseClicked
-        String noteName = noteList.getSelectedValue();
-                Connection conn = null;
+    
+    public void updateList() {
+        Connection conn = null;
         try {
             String url = "jdbc:sqlite:notebook.db";
             conn = DriverManager.getConnection(url);
             Statement stmt = null;
             stmt = conn.createStatement();
-            String sql = "SELECT content FROM note WHERE name = \"" + noteName + "\";";
+            String sql = "SELECT name FROM note WHERE 1;";
             ResultSet rs = stmt.executeQuery(sql);
             DefaultListModel model = new DefaultListModel();
             int i = 0;
             while (rs.next()) {
-                String content = rs.getString("content");
-                noteEditorPane.setText(content);
+                String name = rs.getString("name");
+                model.add(i, name);
+                i++;
             }
+            noteList.setModel(model);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         } finally {
@@ -239,7 +265,49 @@ public class Notebook extends javax.swing.JFrame {
                 System.out.println(ex.getMessage());
             }
         }
+    }
+
+    private void createButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createButtonActionPerformed
+        Note note = new Note();
+        note.create(fileNameInput.getText(), "");
+        updateList();
+        newFileDialogue.dispose();
+    }//GEN-LAST:event_createButtonActionPerformed
+
+    private void noteListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_noteListMouseClicked
+        String noteName = noteList.getSelectedValue();
+        this.currentNote = noteName;
+        Note note = new Note();
+        noteEditorPane.setText(note.getContent(noteName));
     }//GEN-LAST:event_noteListMouseClicked
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+
+        // Update the content in database
+        String s;
+        if (jCheckBoxMenuItem1.isSelected() == true) {
+            s = this.shadowNote;
+        } else {
+            s = noteEditorPane.getText();
+        }
+        Note note = new Note();
+        note.save(this.currentNote, s);
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        if (this.currentNote == null || this.currentNote.isEmpty()) {
+            JOptionPane.showMessageDialog(new JFrame(),
+                    "Please select an Item first.",
+                    "d1p",
+                    JOptionPane.ERROR_MESSAGE);
+        } else {
+            Note note = new Note();
+            note.delete(this.currentNote);
+            noteEditorPane.setText("");
+            // we need to update the list after deleting an item.
+            updateList();
+        }
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -277,6 +345,7 @@ public class Notebook extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JFrame WJframe;
     private javax.swing.JButton createButton;
     private javax.swing.JTextField fileNameInput;
     private javax.swing.JLabel fileNameLabel;
@@ -286,6 +355,8 @@ public class Notebook extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
