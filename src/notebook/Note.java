@@ -5,12 +5,19 @@
  */
 package notebook;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import javax.swing.DefaultListModel;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 
 /**
  *
@@ -51,7 +58,7 @@ public class Note {
     }
 
     public void create(String name, String content) {
-                Connection conn = null;
+        Connection conn = null;
         try {
             String url = "jdbc:sqlite:notebook.db";
             conn = DriverManager.getConnection(url);
@@ -96,7 +103,7 @@ public class Note {
     }
 
     public void delete(String name) {
-                Connection conn = null;
+        Connection conn = null;
         try {
             String url = "jdbc:sqlite:notebook.db";
             conn = DriverManager.getConnection(url);
@@ -114,6 +121,23 @@ public class Note {
             } catch (SQLException ex) {
                 System.out.println(ex.getMessage());
             }
+        }
+    }
+
+    public void export(String name) {
+        String c = this.getContent(name);
+        Parser parser = Parser.builder().build();
+        Node document = parser.parse(c);
+        HtmlRenderer renderer = HtmlRenderer.builder().build();
+        String s = renderer.render(document);
+        try {
+            File file = new File(name + ".html");
+            FileWriter fw = new FileWriter(file);
+            fw.write(s);
+            fw.close();
+        } 
+        catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 }
